@@ -21,7 +21,7 @@ FORCE_SUB = os.environ.get("FORCE_SUB", "Tamilan_Rocks")
 
 DB_NAME = os.environ.get("DB_NAME", "qlbots")     
 
-DB_URL = os.environ.get("DB_URL", "mongodb+srv://leecher:leecher@cluster0.606mkpi.mongodb.net/?retryWrites=true&w=majority"")
+DB_URL = os.environ.get("DB_URL", "mongodb+srv://leecher:leecher@cluster0.606mkpi.mongodb.net/?retryWrites=true&w=majority")
  
 FLOOD = int(os.environ.get("FLOOD", "10"))
 
