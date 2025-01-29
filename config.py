@@ -2,35 +2,55 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
+import logging
+import logging.config
+from pyrogram import Client 
+from config import API_ID, API_HASH, BOT_TOKEN, FORCE_SUB, PORT
+from aiohttp import web
+from plugins.web_support import web_server
 
-import re, os
+logging.config.fileConfig('logging.conf')
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("pyrogram").setLevel(logging.ERROR)
 
-id_pattern = re.compile(r'^.\d+$') 
 
-API_ID = os.environ.get("API_ID", "")
+class Bot(Client):
 
-API_HASH = os.environ.get("API_HASH", "")
+    def __init__(self):
+        super().__init__(
+            name="WebX-Renamer",
+            api_id=API_ID,
+            api_hash=API_HASH,
+            bot_token=BOT_TOKEN,
+            workers=50,
+            plugins={"root": "plugins"},
+            sleep_threshold=5,
+        )
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "") 
+    async def start(self):
+       await super().start()
+       me = await self.get_me()
+       self.mention = me.mention
+       self.username = me.username 
+       self.force_channel = FORCE_SUB
+       if FORCE_SUB:
+         try:
+            link = await self.export_chat_invite_link(FORCE_SUB)                  
+            self.invitelink = link
+         except Exception as e:
+            logging.warning(e)
+            logging.warning("Make Sure Bot admin in force sub channel")             
+            self.force_channel = None
+       app = web.AppRunner(await web_server())
+       await app.setup()
+       bind_address = "0.0.0.0"
+       await web.TCPSite(app, bind_address, PORT).start()
+       logging.info(f"{me.first_name} ✅✅ BOT started successfully ✅✅")
+      
 
-FORCE_SUB = os.environ.get("FORCE_SUB", "VJ_Botz") 
-
-             # Don't Remove Credit @VJ_Botz
-             # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-             # Ask Doubt on telegram @KingVJ01
-
-DB_NAME = os.environ.get("DB_NAME", "renamevjbot")     
-
-DB_URL = os.environ.get("DB_URL", "")
- 
-FLOOD = int(os.environ.get("FLOOD", "10"))
-
-START_PIC = os.environ.get("START_PIC", "https://te.legra.ph/file/119729ea3cdce4fefb6a1.jpg")
-
-ADMIN = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '5606411877').split()]
-
-PORT = os.environ.get("PORT", "8080")
-
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
+    async def stop(self, *args):
+      await super().stop()      
+      logging.info("Bot Stopped 🙄")
+        
+bot = Bot()
+bot.run()
